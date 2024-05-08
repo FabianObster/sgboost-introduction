@@ -60,10 +60,9 @@ path_plot <- plot_path(sgb_model = sgb_model)
 ggsave('figures/path.png',plot = path_plot, width = 7, height = 5, dpi = 900)
 
 # real data (from using interpretable boosting...)
-
+index_df <- readRDS('index_df.RDS')
 model_df <- readRDS('model_df.RDS') %>%
   mutate_at(index_df$col_names, factor)
-index_df <- readRDS('index_df.RDS')
 
 sgb_formula <- create_formula(group_df = index_df, var_name = 'col_names',
                               group_name = 'index', outcome_name = 'S5.4')
