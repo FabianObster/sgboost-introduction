@@ -56,10 +56,37 @@ ggsave('figures/radar_2.png', plot = p3, width = 8, height = 5, dpi = 900)
 
 path <- get_coef_path(sgb_model = sgb_model)
 
-path_plot <- plot_path(sgb_model = sgb_model[10])
+path_plot <- plot_path(sgb_model = sgb_model)
 ggsave('figures/path.png',plot = path_plot, width = 7, height = 5, dpi = 900)
 
 # real data (from using interpretable boosting...)
 
-model_df <- readRDS('model_df.RDS')
+model_df <- readRDS('model_df.RDS') %>%
+  mutate_at(index_df$col_names, factor)
 index_df <- readRDS('index_df.RDS')
+
+sgb_formula <- create_formula(group_df = index_df, var_name = 'col_names',
+                              group_name = 'index', outcome_name = 'S5.4')
+model <- mboost(sgb_formula, data = model_df, family = Binomial(link = 'logit'),
+                control = boost_control(mstop = 1000, nu = 0.3))
+cv_model <- cvrisk(model)
+mstop(cv_model)
+model <- model[mstop(cv_model)]
+## helper function
+`-.gg` <- function(plot, layer) {
+  if (missing(layer)) {
+    stop("Cannot use `-.gg()` with a single argument. Did you accidentally put - on a new line?")
+  }
+  if (!is.ggplot(plot)) {
+    stop('Need a plot on the left side')
+  }
+  plot$layers = c(layer, plot$layers)
+  plot
+}
+## helper function
+plot_path(model) - geom_line(size = 0.2) 
+ggsave('figures/cc_path.png', dpi = 900, width = 7, height = 5)
+plot_varimp(model)
+ggsave('figures/cc_varimp.png', dpi = 900, width = 7, height = 5)
+plot_effects(model, plot_type = 'scatter', prop = 0.015, max_char_length = 6)
+ggsave('figures/cc_effects.png', dpi = 900, width = 7, height = 5)
