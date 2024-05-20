@@ -11,10 +11,7 @@ X <- matrix(data = rnorm(20000, mean = 0, sd = 1), 100, 200)
 df <- data.frame(X) %>%
   mutate(y = X %*% beta+rnorm(100, mean = 0, sd = 1)) %>%
   mutate_all(function(x){as.numeric(scale(x))})
-groups <- rep(40, each = 5)
 group_df <- data.frame(group_name = rep(1:40, each = 5), variable_name = colnames(df)[1:200])
-
-
 
 # Input data.frames
 sgb_formula <- create_formula(
@@ -61,9 +58,7 @@ ggsave('figures/path.png',plot = path_plot, width = 7, height = 5, dpi = 900)
 
 # real data (from using interpretable boosting...)
 index_df <- readRDS('index_df.RDS')
-model_df <- readRDS('model_df.RDS') %>%
-  mutate_at(index_df$col_names, factor)
-
+model_df <- readRDS('model_df.RDS')
 sgb_formula <- create_formula(group_df = index_df, var_name = 'col_names',
                               group_name = 'index', outcome_name = 'S5.4')
 model <- mboost(sgb_formula, data = model_df, family = Binomial(link = 'logit'),
@@ -83,7 +78,7 @@ model <- model[mstop(cv_model)]
   plot
 }
 ## helper function
-plot_path(model) - geom_line(size = 0.2) 
+plot_path(model) #- geom_line(size = 0.2) 
 ggsave('figures/cc_path.png', dpi = 900, width = 7, height = 5)
 plot_varimp(model)
 ggsave('figures/cc_varimp.png', dpi = 900, width = 7, height = 5)
