@@ -1,3 +1,4 @@
+# devtools::install_github("FabianObster/sgboost")
 library(sgboost)
 library(tidyverse)
 library(mboost)
@@ -26,6 +27,7 @@ sgb_model <- mboost(
   control = boost_control(nu = 1, mstop = 600)
 )
 cv_sgb_model <- cvrisk(sgb_model)
+mstop(cv_sgb_model)
 png(file="figures/cv_plot.png",
     width=600, height=350)
 plot(cv_sgb_model)
@@ -66,19 +68,8 @@ model <- mboost(sgb_formula, data = model_df, family = Binomial(link = 'logit'),
 cv_model <- cvrisk(model)
 mstop(cv_model)
 model <- model[mstop(cv_model)]
-## helper function
-`-.gg` <- function(plot, layer) {
-  if (missing(layer)) {
-    stop("Cannot use `-.gg()` with a single argument. Did you accidentally put - on a new line?")
-  }
-  if (!is.ggplot(plot)) {
-    stop('Need a plot on the left side')
-  }
-  plot$layers = c(layer, plot$layers)
-  plot
-}
-## helper function
-plot_path(model) #- geom_line(size = 0.2) 
+
+plot_path(model) 
 ggsave('figures/cc_path.png', dpi = 900, width = 7, height = 5)
 plot_varimp(model)
 ggsave('figures/cc_varimp.png', dpi = 900, width = 7, height = 5)
